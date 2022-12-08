@@ -1,4 +1,4 @@
-name: CICD Payments-service.
+name: CICD Payments-service
 on:
   push:
     branches:
