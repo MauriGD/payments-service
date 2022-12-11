@@ -73,3 +73,20 @@ jobs:
             docker build --build-arg JAR_FILE=target/payments-service-example-0.0.1-SNAPSHOT.jar -t payments-service .
             docker tag payments-service:latest 083266080818.dkr.ecr.us-east-1.amazonaws.com/payments-service:$IMAGE_TAG
             docker push 083266080818.dkr.ecr.us-east-1.amazonaws.com/payments-service:$IMAGE_TAG
+            aws ecs describe-task-definition --task-definition payments_service-task --query taskDefinition > task-definition.json
+
+                        
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+         task-definition: task-definition.json
+         container-name: payments_service
+         image: 083266080818.dkr.ecr.us-east-1.amazonaws.com/payments_service:latest
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+         task-definition: task-definition.json
+         service: payments_service
+         cluster: FGCluster
+         wait-for-service-stability: true
